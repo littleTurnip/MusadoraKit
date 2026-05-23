@@ -1,6 +1,5 @@
 # MusadoraKit
 
-
 MusadoraKit (pronounced 'myu' za' 'do' 'ra') is the ultimate companion to MusicKit. It makes working with MusicKit and Apple Music API much easier, with one-liner API implementations.
 
 <p align="center">
@@ -16,18 +15,6 @@ MusadoraKit (pronounced 'myu' za' 'do' 'ra') is the ultimate companion to MusicK
   <img src="https://img.shields.io/badge/tvOS-15.0+-000000?style=flat&logo=apple&logoColor=white" alt="tvOS 15.0+">
   <img src="https://img.shields.io/badge/visionOS-1.0+-000000?style=flat&logo=apple&logoColor=white" alt="visionOS 1.0+">
 </p>
-
-## Exploring MusicKit and Apple Music API Book
-
-<p align="center">
-  <a href="https://academy.rudrank.com/product/musickit" target="_blank">
-    <img src="https://img.shields.io/badge/Book-Exploring%20MusicKit%20%26%20Apple%20Music%20API-blue?style=for-the-badge&logo=book&logoColor=white" alt="Exploring MusicKit and Apple Music API Book">
-  </a>
-</p>
-
-I have written a book on MusicKit and Apple Music API, ["Exploring MusicKit and Apple Music API"](https://academy.rudrank.com/product/musickit).
-
-It has all the documentation and references you need to get started with MusicKit and Apple Music API.
 
 ## Installation
 
