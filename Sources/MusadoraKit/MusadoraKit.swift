@@ -21,15 +21,19 @@ public struct MusadoraKit {}
 /// Rating operations are provided via extensions on `MCatalog` and `MLibrary` in the `Ratings` module.
 
 extension MusadoraKit {
-    private static let userTokenKey = "com.musadorakit.userToken"
+    static let userTokenKey = "com.musadorakit.userToken"
+    private static let userTokenStore = KeychainUserTokenStore()
 
     /// The user token for authentication.
+    ///
+    /// Tokens are stored in Keychain. Existing tokens saved by older versions in
+    /// `UserDefaults` are migrated into Keychain on first read.
     public static var userToken: String? {
         get {
-            UserDefaults.standard.string(forKey: userTokenKey)
+            userTokenStore.token()
         }
         set {
-            UserDefaults.standard.set(newValue, forKey: userTokenKey)
+            userTokenStore.setToken(newValue)
         }
     }
 

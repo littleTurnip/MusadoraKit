@@ -54,6 +54,9 @@ public enum MusadoraKitError: Error, Equatable {
   /// The library music item type is not recognized or unsupported.
   case invalidLibraryItemType
 
+  /// The library filter is not supported by the Apple Music API request builder.
+  case unsupportedLibraryFilter
+
   /// The music recommendation item type is not supported for playback.
   case unsupportedRecommendationItemType
 
@@ -106,6 +109,8 @@ extension MusadoraKitError: CustomStringConvertible {
       return "The equivalent music item type is not recognized or unsupported."
     case .invalidLibraryItemType:
       return "The library music item type is not recognized or unsupported."
+    case .unsupportedLibraryFilter:
+      return "The library filter is not supported by MusadoraKit's library resource request builder."
     case .unsupportedRecommendationItemType:
       return "The music recommendation item type is not supported for playback."
     case .invalidImage:
