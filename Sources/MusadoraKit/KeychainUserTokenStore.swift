@@ -35,13 +35,17 @@ struct KeychainUserTokenStore: UserTokenStoring {
 
   func setToken(_ token: String?) {
     guard let token else {
-      deleteKeychainToken()
-      UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+      if deleteKeychainToken() {
+        UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+      }
       return
     }
 
-    _ = storeInKeychain(token)
-    UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+    if storeInKeychain(token) {
+      UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+    } else {
+      UserDefaults.standard.set(token, forKey: MusadoraKit.userTokenKey)
+    }
   }
 
   private func keychainToken() -> String? {
@@ -81,8 +85,9 @@ struct KeychainUserTokenStore: UserTokenStoring {
     return SecItemAdd(query as CFDictionary, nil) == errSecSuccess
   }
 
-  private func deleteKeychainToken() {
-    SecItemDelete(baseQuery() as CFDictionary)
+  private func deleteKeychainToken() -> Bool {
+    let status = SecItemDelete(baseQuery() as CFDictionary)
+    return status == errSecSuccess || status == errSecItemNotFound
   }
 
   private func baseQuery() -> [String: Any] {
