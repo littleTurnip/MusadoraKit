@@ -46,6 +46,7 @@ struct KeychainUserTokenStore: UserTokenStoring {
         UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
       } else {
         UserDefaults.standard.set(true, forKey: pendingClearKey)
+        UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
       }
       return
     }
