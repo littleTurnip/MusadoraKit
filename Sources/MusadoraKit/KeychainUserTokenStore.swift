@@ -61,7 +61,23 @@ struct KeychainUserTokenStore: UserTokenStoring {
   }
 
   private func keychainToken() -> String? {
-    var query = baseQuery()
+    if let token = keychainToken(useDataProtectionKeychain: true) {
+      return token
+    }
+
+    guard let legacyToken = keychainToken(useDataProtectionKeychain: false) else {
+      return nil
+    }
+
+    if storeInKeychain(legacyToken) {
+      _ = deleteKeychainToken(useDataProtectionKeychain: false)
+    }
+
+    return legacyToken
+  }
+
+  private func keychainToken(useDataProtectionKeychain: Bool) -> String? {
+    var query = baseQuery(useDataProtectionKeychain: useDataProtectionKeychain)
     query[kSecReturnData as String] = true
     query[kSecMatchLimit as String] = kSecMatchLimitOne
 
@@ -95,7 +111,15 @@ struct KeychainUserTokenStore: UserTokenStoring {
   }
 
   private func deleteKeychainToken() -> Bool {
-    let status = SecItemDelete(baseQuery() as CFDictionary)
+    let dataProtectionDeleted = deleteKeychainToken(useDataProtectionKeychain: true)
+    let legacyDeleted = deleteKeychainToken(useDataProtectionKeychain: false)
+    return dataProtectionDeleted && legacyDeleted
+  }
+
+  private func deleteKeychainToken(useDataProtectionKeychain: Bool) -> Bool {
+    let status = SecItemDelete(
+      baseQuery(useDataProtectionKeychain: useDataProtectionKeychain) as CFDictionary
+    )
     return status == errSecSuccess || status == errSecItemNotFound
   }
 
@@ -106,16 +130,18 @@ struct KeychainUserTokenStore: UserTokenStoring {
     ]
   }
 
-  func baseQuery() -> [String: Any] {
+  func baseQuery(useDataProtectionKeychain: Bool = true) -> [String: Any] {
     var query: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrService as String: service,
       kSecAttrAccount as String: account
     ]
 
-    #if canImport(Darwin)
-    query[kSecUseDataProtectionKeychain as String] = true
-    #endif
+    if useDataProtectionKeychain {
+      #if canImport(Darwin)
+      query[kSecUseDataProtectionKeychain as String] = true
+      #endif
+    }
 
     return query
   }

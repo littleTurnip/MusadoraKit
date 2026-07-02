@@ -17,6 +17,17 @@ struct KeychainUserTokenStoreTests {
   }
 
   @Test
+  func legacyBaseQueryDoesNotUseDataProtectionKeychain() {
+    let store = KeychainUserTokenStore()
+    let query = store.baseQuery(useDataProtectionKeychain: false)
+
+    #expect(query[kSecClass as String] as? String == kSecClassGenericPassword as String)
+    #expect(query[kSecAttrService as String] as? String == "com.musadorakit.user-token")
+    #expect(query[kSecAttrAccount as String] as? String == "media-user-token")
+    #expect(query[kSecUseDataProtectionKeychain as String] == nil)
+  }
+
+  @Test
   func keychainAttributesStoreProtectedTokenData() throws {
     let store = KeychainUserTokenStore()
     let attributes = store.keychainAttributes(for: "music-user-token")
