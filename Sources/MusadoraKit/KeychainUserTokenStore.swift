@@ -16,8 +16,18 @@ protocol UserTokenStoring {
 struct KeychainUserTokenStore: UserTokenStoring {
   private let service = "com.musadorakit.user-token"
   private let account = "media-user-token"
+  private let pendingClearKey = "com.musadorakit.userToken.pendingClear"
 
   func token() -> String? {
+    if UserDefaults.standard.bool(forKey: pendingClearKey) {
+      if deleteKeychainToken() {
+        UserDefaults.standard.removeObject(forKey: pendingClearKey)
+        UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+      }
+
+      return nil
+    }
+
     if let token = keychainToken() {
       return token
     }
@@ -36,14 +46,19 @@ struct KeychainUserTokenStore: UserTokenStoring {
   func setToken(_ token: String?) {
     guard let token else {
       if deleteKeychainToken() {
+        UserDefaults.standard.removeObject(forKey: pendingClearKey)
         UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+      } else {
+        UserDefaults.standard.set(true, forKey: pendingClearKey)
       }
       return
     }
 
     if storeInKeychain(token) {
+      UserDefaults.standard.removeObject(forKey: pendingClearKey)
       UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
     } else {
+      UserDefaults.standard.removeObject(forKey: pendingClearKey)
       UserDefaults.standard.set(token, forKey: MusadoraKit.userTokenKey)
     }
   }
