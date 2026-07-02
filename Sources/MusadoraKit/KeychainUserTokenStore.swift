@@ -28,19 +28,15 @@ struct KeychainUserTokenStore: UserTokenStoring {
       return nil
     }
 
-    if let token = keychainToken() {
-      return token
+    if let legacyToken = UserDefaults.standard.string(forKey: MusadoraKit.userTokenKey) {
+      if storeInKeychain(legacyToken) {
+        UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
+      }
+
+      return legacyToken
     }
 
-    guard let legacyToken = UserDefaults.standard.string(forKey: MusadoraKit.userTokenKey) else {
-      return nil
-    }
-
-    if storeInKeychain(legacyToken) {
-      UserDefaults.standard.removeObject(forKey: MusadoraKit.userTokenKey)
-    }
-
-    return legacyToken
+    return keychainToken()
   }
 
   func setToken(_ token: String?) {
