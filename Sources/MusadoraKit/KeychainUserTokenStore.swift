@@ -77,10 +77,7 @@ struct KeychainUserTokenStore: UserTokenStoring {
   }
 
   private func storeInKeychain(_ token: String) -> Bool {
-    let attributes: [String: Any] = [
-      kSecValueData as String: Data(token.utf8),
-      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-    ]
+    let attributes = keychainAttributes(for: token)
 
     let updateStatus = SecItemUpdate(baseQuery() as CFDictionary, attributes as CFDictionary)
     if updateStatus == errSecSuccess {
@@ -102,11 +99,24 @@ struct KeychainUserTokenStore: UserTokenStoring {
     return status == errSecSuccess || status == errSecItemNotFound
   }
 
-  private func baseQuery() -> [String: Any] {
+  func keychainAttributes(for token: String) -> [String: Any] {
     [
+      kSecValueData as String: Data(token.utf8),
+      kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
+    ]
+  }
+
+  func baseQuery() -> [String: Any] {
+    var query: [String: Any] = [
       kSecClass as String: kSecClassGenericPassword,
       kSecAttrService as String: service,
       kSecAttrAccount as String: account
     ]
+
+    #if canImport(Darwin)
+    query[kSecUseDataProtectionKeychain as String] = true
+    #endif
+
+    return query
   }
 }
