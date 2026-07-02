@@ -36,6 +36,17 @@ struct LibraryResourceEndpointTests {
   }
 
   @Test
+  func nonIDLibraryFilterThrowsInsteadOfBeingDropped() throws {
+    let request = MusicLibraryResourceRequest<Album>(matching: \.testName, equalTo: "Kind of Blue")
+
+    let error = #expect(throws: MusadoraKitError.self) {
+      try request.libraryEndpointURL
+    }
+
+    #expect(error == MusadoraKitError.unsupportedLibraryFilter)
+  }
+
+  @Test
   func libraryPlaylistsLimitEndpointIncludesLimitQuery() throws {
     let url = try MLibrary.libraryPlaylistsURL(limit: 10)
     let concreteURL = try #require(url)
@@ -71,4 +82,8 @@ struct LibraryResourceEndpointTests {
       result[item.name] = item.value
     }
   }
+}
+
+private extension AlbumLibraryFilter {
+  var testName: String { "" }
 }

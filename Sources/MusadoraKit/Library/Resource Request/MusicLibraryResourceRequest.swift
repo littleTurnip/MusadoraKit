@@ -25,7 +25,9 @@ struct MusicLibraryResourceRequest<MusicItemType: MusicItem & Codable> {
     setType()
 
     if let id = value as? MusicItemID {
-      ids = [id.rawValue]
+      filter = .ids([id.rawValue])
+    } else {
+      filter = .unsupported
     }
   }
 
@@ -35,7 +37,9 @@ struct MusicLibraryResourceRequest<MusicItemType: MusicItem & Codable> {
     setType()
 
     if let ids = values as? [MusicItemID] {
-      self.ids = ids.map { $0.rawValue }
+      filter = .ids(ids.map { $0.rawValue })
+    } else {
+      filter = .unsupported
     }
   }
 
@@ -58,7 +62,12 @@ struct MusicLibraryResourceRequest<MusicItemType: MusicItem & Codable> {
   }
 
   private var type: LibraryMusicItemType?
-  private var ids: [String]?
+  private var filter: LibraryResourceFilter?
+}
+
+private enum LibraryResourceFilter {
+  case ids([String])
+  case unsupported
 }
 
 extension MusicLibraryResourceRequest {
@@ -88,11 +97,16 @@ extension MusicLibraryResourceRequest {
 
       components.path = "me/library/\(type.rawValue)"
 
-      if let ids = ids {
+      switch filter {
+      case let .ids(ids):
         guard !ids.isEmpty else {
           throw MusadoraKitError.idMissing
         }
         queryItems += [URLQueryItem(name: "ids", value: ids.joined(separator: ","))]
+      case .unsupported:
+        throw MusadoraKitError.unsupportedLibraryFilter
+      case nil:
+        break
       }
 
       if let limit = limit {
