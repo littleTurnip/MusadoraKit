@@ -242,9 +242,11 @@ public extension MLibrary {
   /// This method handles pagination automatically when the requested limit exceeds
   /// the API maximum of 100 items per request.
   ///
-  /// - Parameter limit: The maximum number of playlists to return.
+  /// - Parameters:
+  ///   - limit: The maximum number of playlists to return.
+  ///   - includeParent: Whether each playlist should include its parent folder relationship.
   /// - Returns: `LibraryPlaylists` that contains the user's library playlists.
-  static func playlists(limit: Int) async throws -> LibraryPlaylists {
+  static func playlists(limit: Int, includeParent: Bool = false) async throws -> LibraryPlaylists {
     guard limit > 0 else {
       return LibraryPlaylists([])
     }
@@ -256,7 +258,7 @@ public extension MLibrary {
       let remaining = limit - allPlaylists.count
       let requestLimit = min(remaining, maxAPILimit)
 
-      guard let url = try libraryPlaylistsURL(limit: requestLimit, offset: offset) else {
+      guard let url = try libraryPlaylistsURL(limit: requestLimit, offset: offset, includeParent: includeParent) else {
         break
       }
 
@@ -326,7 +328,7 @@ public extension MLibrary {
     return try await playlists.collectingAll()
   }
 
-  internal static func libraryPlaylistsURL(limit: Int, offset: Int = 0) throws -> URL? {
+  internal static func libraryPlaylistsURL(limit: Int, offset: Int = 0, includeParent: Bool = false) throws -> URL? {
     guard limit > 0 else { return nil }
 
     var components = AppleMusicURLComponents()
@@ -338,6 +340,10 @@ public extension MLibrary {
 
     if offset > 0 {
       queryItems.append(URLQueryItem(name: "offset", value: "\(offset)"))
+    }
+
+    if includeParent {
+      queryItems.append(URLQueryItem(name: "include", value: "parent"))
     }
 
     components.queryItems = queryItems.isEmpty ? nil : queryItems

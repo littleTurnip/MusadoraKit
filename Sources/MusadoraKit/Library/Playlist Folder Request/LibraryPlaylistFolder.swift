@@ -25,6 +25,9 @@ public struct LibraryPlaylistFolder: Codable, Sendable {
   /// The type of the resource, typically "library-playlist-folders".
   public let type: String
 
+  /// The relative location of the playlist folder resource.
+  public let href: String?
+
   /// The attributes of the playlist folder.
   public let attributes: Attributes?
 
