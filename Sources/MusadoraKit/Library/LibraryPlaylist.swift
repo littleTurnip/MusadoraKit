@@ -28,6 +28,9 @@ public struct LibraryPlaylist: Codable, MusicItem {
   /// This encompasses a range of information from its name, description, artwork, to its editability.
   public var attributes: Attributes
 
+  /// Relationships attached to the playlist response.
+  public let relationships: Relationships?
+
   /// Describes various characteristics of a playlist.
   ///
   /// The attributes provide a detailed look into the playlist's metadata and characteristics.
@@ -84,8 +87,19 @@ public struct LibraryPlaylist: Codable, MusicItem {
     public let standard: String
   }
 
+  /// Relationships available for a library playlist.
+  public struct Relationships: Codable, Sendable {
+    /// The folder that contains the playlist.
+    public let parent: LibraryPlaylistParentRelationship?
+  }
+
   /// Optionally retrieves the global identifier for the playlist.
   public var globalID: String? { attributes.playParams.globalID?.rawValue }
+
+  /// The folder that contains this playlist when the parent relationship was requested.
+  public var parentFolder: LibraryPlaylistFolder? {
+    relationships?.parent?.data.first
+  }
 }
 
 @available(macOS 14.0, *)
