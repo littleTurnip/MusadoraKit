@@ -1,5 +1,5 @@
-@testable import MusadoraKit
 import Foundation
+@testable import MusadoraKit
 @preconcurrency import Security
 import Testing
 
