@@ -12,7 +12,7 @@ import Testing
 struct LibraryPlaylistParentTests {
   @Test
   func directParentEndpointURL() throws {
-    let url = try MLibrary.playlistParentFolderURL(id: "p.example")
+    let url = try MLibrary.parentFolderURL(forPlaylistID: "p.example")
 
     expectEndpoint(
       url,
@@ -22,7 +22,7 @@ struct LibraryPlaylistParentTests {
 
   @Test
   func playlistCollectionIncludesParent() throws {
-    let endpoint = try MLibrary.libraryPlaylistsURL(limit: 100, includeParent: true)
+    let endpoint = try MLibrary.libraryPlaylistsURL(limit: 100, with: [.parent])
     let url = try #require(endpoint)
 
     expectEndpoint(
@@ -109,10 +109,12 @@ struct LibraryPlaylistParentTests {
     )
 
     let playlists = try JSONDecoder().decode(LibraryPlaylists.self, from: json)
-    let parent = try #require(playlists.first?.relationships?.parent?.data.first)
+    let playlist = try #require(playlists.first)
+    let parent = try #require(playlist.parentFolder)
 
     #expect(parent.id == "p.playlistsroot")
     #expect(parent.type == "library-playlist-folders")
     #expect(parent.href == "/v1/me/library/playlist-folders/p.playlistsroot")
+    #expect(playlist.relationships?.parent?.data.first?.id == parent.id)
   }
 }

@@ -242,11 +242,19 @@ public extension MLibrary {
   /// This method handles pagination automatically when the requested limit exceeds
   /// the API maximum of 100 items per request.
   ///
+  /// - Parameter limit: The maximum number of playlists to return.
+  /// - Returns: `LibraryPlaylists` that contains the user's library playlists.
+  static func playlists(limit: Int) async throws -> LibraryPlaylists {
+    try await playlists(limit: limit, with: [])
+  }
+
+  /// Fetch all playlists and the requested relationships from the user's library.
+  ///
   /// - Parameters:
   ///   - limit: The maximum number of playlists to return.
-  ///   - includeParent: Whether each playlist should include its parent folder relationship.
-  /// - Returns: `LibraryPlaylists` that contains the user's library playlists.
-  static func playlists(limit: Int, includeParent: Bool = false) async throws -> LibraryPlaylists {
+  ///   - properties: Relationships to include with each playlist.
+  /// - Returns: `LibraryPlaylists` containing the user's library playlists.
+  static func playlists(limit: Int, with properties: LibraryPlaylistProperties) async throws -> LibraryPlaylists {
     guard limit > 0 else {
       return LibraryPlaylists([])
     }
@@ -258,7 +266,7 @@ public extension MLibrary {
       let remaining = limit - allPlaylists.count
       let requestLimit = min(remaining, maxAPILimit)
 
-      guard let url = try libraryPlaylistsURL(limit: requestLimit, offset: offset, includeParent: includeParent) else {
+      guard let url = try libraryPlaylistsURL(limit: requestLimit, offset: offset, with: properties) else {
         break
       }
 
@@ -328,7 +336,11 @@ public extension MLibrary {
     return try await playlists.collectingAll()
   }
 
-  internal static func libraryPlaylistsURL(limit: Int, offset: Int = 0, includeParent: Bool = false) throws -> URL? {
+  internal static func libraryPlaylistsURL(
+    limit: Int,
+    offset: Int = 0,
+    with properties: LibraryPlaylistProperties = []
+  ) throws -> URL? {
     guard limit > 0 else { return nil }
 
     var components = AppleMusicURLComponents()
@@ -342,8 +354,13 @@ public extension MLibrary {
       queryItems.append(URLQueryItem(name: "offset", value: "\(offset)"))
     }
 
-    if includeParent {
-      queryItems.append(URLQueryItem(name: "include", value: "parent"))
+    if !properties.isEmpty {
+      queryItems.append(
+        URLQueryItem(
+          name: "include",
+          value: properties.map(\.rawValue).joined(separator: ",")
+        )
+      )
     }
 
     components.queryItems = queryItems.isEmpty ? nil : queryItems

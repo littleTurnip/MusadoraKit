@@ -95,6 +95,11 @@ public struct LibraryPlaylist: Codable, MusicItem {
 
   /// Optionally retrieves the global identifier for the playlist.
   public var globalID: String? { attributes.playParams.globalID?.rawValue }
+
+  /// The folder that contains this playlist when the parent relationship was requested.
+  public var parentFolder: LibraryPlaylistFolder? {
+    relationships?.parent?.data.first
+  }
 }
 
 @available(macOS 14.0, *)

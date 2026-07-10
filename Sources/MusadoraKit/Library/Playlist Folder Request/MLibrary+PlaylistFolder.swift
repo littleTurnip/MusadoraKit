@@ -17,7 +17,7 @@ import Foundation
 /// Example usage:
 /// ```swift
 /// do {
-///     let folder = try await MLibrary.playlistParentFolder(id: "p.example")
+///     let folder = try await MLibrary.parentFolder(forPlaylistID: "p.example")
 ///     print("Folder name: \(folder.attributes?.name ?? "Root")")
 /// } catch {
 ///     print("Failed to fetch the parent folder: \(error)")
@@ -31,8 +31,8 @@ extension MLibrary {
   /// - Parameter id: The unique identifier of the library playlist.
   /// - Returns: The playlist's parent folder.
   /// - Throws: An error if the request fails or the response doesn't contain a parent folder.
-  public static func playlistParentFolder(id: MusicItemID) async throws -> LibraryPlaylistFolder {
-    let url = try playlistParentFolderURL(id: id)
+  public static func parentFolder(forPlaylistID id: MusicItemID) async throws -> LibraryPlaylistFolder {
+    let url = try parentFolderURL(forPlaylistID: id)
     let data: Data
 
     if let userToken = MusadoraKit.userToken {
@@ -62,8 +62,8 @@ extension MLibrary {
     return folder
   }
 
-  internal static func playlistParentFolderURL(
-    id: MusicItemID,
+  internal static func parentFolderURL(
+    forPlaylistID id: MusicItemID,
     components: MusicURLComponents = AppleMusicURLComponents()
   ) throws -> URL {
     var components = components
