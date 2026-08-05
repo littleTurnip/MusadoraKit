@@ -45,6 +45,23 @@ struct MusicRecommendationRequestEndpointTests {
   }
 
   @Test
+  func recommendationsByIDsEndpointURL() throws {
+    let request = MusicRecommendationRequest(memberOf: ["6-27s5hU6azhJY", "6-27s5hU6azhJa"])
+    let url = try request.recommendationEndpointURL
+
+    expectEndpoint(url, equals: "https://api.music.apple.com/v1/me/recommendations?ids=6-27s5hU6azhJY,6-27s5hU6azhJa")
+  }
+
+  @Test
+  func recommendationsByIDsWithLimitEndpointURL() throws {
+    var request = MusicRecommendationRequest(memberOf: ["6-27s5hU6azhJY", "6-27s5hU6azhJa"])
+    request.limit = 2
+    let url = try request.recommendationEndpointURL
+
+    expectEndpoint(url, equals: "https://api.music.apple.com/v1/me/recommendations?ids=6-27s5hU6azhJY,6-27s5hU6azhJa&limit=2")
+  }
+
+  @Test
   func defaultRecommendationEndpointURLWithOverLimit() {
     let limit = 31
     var request = MusicRecommendationRequest()
