@@ -14,9 +14,12 @@ import Foundation
 ///
 /// Example usage:
 /// ```swift
-/// let folder = try await MLibrary.playlistFolder(id: "folder_id")
+/// let folder = try await MLibrary.playlistFolder(id: "p.WmzVVDOUO9pDBk")
 /// print(folder.attributes?.name)
 /// print(folder.attributes?.dateAdded)
+///
+/// let newFolder = try await MLibrary.createPlaylistFolder(name: "Workout Mixes")
+/// print(newFolder.id)
 /// ```
 public struct LibraryPlaylistFolder: Codable, Sendable {
   /// The unique identifier of the playlist folder.
