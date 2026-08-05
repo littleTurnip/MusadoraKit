@@ -21,6 +21,10 @@ struct SettingsView: View {
           Link("Rudrank Riyam on X (Twitter)", destination: URL(string: "https://twitter.com/rudrankriyam")!)
         }
 
+        Section("Storefront") {
+          NavigationLink("Localization") { LocalizationView() }
+        }
+
         Section("Authorization") {
           HStack {
             Text("Music Access")
