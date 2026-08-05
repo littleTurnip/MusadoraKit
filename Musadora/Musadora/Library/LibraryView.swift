@@ -16,6 +16,7 @@ struct LibraryView: View {
           NavigationLink("Songs") { LibrarySongsView() }
           NavigationLink("Albums") { LibraryAlbumsView() }
           NavigationLink("Playlists") { LibraryPlaylistsView() }
+          NavigationLink("Playlist Folders") { LibraryPlaylistFoldersView() }
         }
 
         Section("History") {

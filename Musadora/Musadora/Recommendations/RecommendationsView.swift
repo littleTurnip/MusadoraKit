@@ -59,6 +59,11 @@ struct RecommendationsView: View {
         }
       }
       .padding(.horizontal)
+      .toolbar {
+        NavigationLink(destination: { RecommendationByIDView() }, label: {
+          Label("Recommendation by ID", systemImage: "sparkle.magnifyingglass")
+        })
+      }
     }
     .task {
       do {
