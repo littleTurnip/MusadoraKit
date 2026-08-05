@@ -29,9 +29,9 @@ struct LibraryPlaylistFoldersView: View {
       if !path.isEmpty {
         Section {
           Button("Back to Root") {
-            path.removeAll()
-            Task { await loadChildren() }
+            Task { await returnToRoot() }
           }
+          .disabled(isLoading)
         }
       }
 
@@ -42,11 +42,11 @@ struct LibraryPlaylistFoldersView: View {
 
         ForEach(children?.folders ?? [], id: \.id) { folder in
           Button {
-            path.append(folder)
-            Task { await loadChildren() }
+            Task { await open(folder) }
           } label: {
             Label(folder.attributes?.name ?? folder.id, systemImage: "folder")
           }
+          .disabled(isLoading)
         }
       }
 
@@ -66,7 +66,7 @@ struct LibraryPlaylistFoldersView: View {
         Button("Create in \(currentFolder?.attributes?.name ?? "Root")") {
           Task { await createFolder() }
         }
-        .disabled(newFolderName.isEmpty || isLoading)
+        .disabled(newFolderName.isEmpty || isLoading || currentFolder == nil)
       }
     }
     .navigationTitle(currentFolder?.attributes?.name ?? "Playlist Folders")
@@ -74,44 +74,73 @@ struct LibraryPlaylistFoldersView: View {
   }
 }
 
+// Every action is single-flight: `beginLoading()` runs on the main actor
+// before the first await, so a second tap in the same frame — before the
+// disabled state re-renders — bails instead of starting an overlapping load.
+// `path` and `children` mutate together only after the awaited load succeeds,
+// so the list can never show one level while `path` points at another, and a
+// slow response can never overwrite state that belongs to a later navigation.
 extension LibraryPlaylistFoldersView {
-  private func loadRoot() async {
+  private func beginLoading() -> Bool {
+    guard !isLoading else { return false }
     isLoading = true
+    return true
+  }
+
+  private func loadRoot() async {
+    guard beginLoading() else { return }
     defer { isLoading = false }
 
     do {
-      root = try await MLibrary.rootPlaylistsFolder()
-      await loadChildren()
+      let folder = try await MLibrary.rootPlaylistsFolder()
+      root = folder
+      children = try await children(of: folder)
     } catch {
       ErrorPresenter.shared.present(error)
     }
   }
 
-  private func loadChildren() async {
-    guard let folder = currentFolder else { return }
-
-    isLoading = true
+  private func open(_ folder: LibraryPlaylistFolder) async {
+    guard beginLoading() else { return }
     defer { isLoading = false }
 
     do {
-      children = try await MLibrary.playlistFolderChildren(forFolderID: MusicItemID(folder.id))
+      let loaded = try await children(of: folder)
+      path.append(folder)
+      children = loaded
+    } catch {
+      ErrorPresenter.shared.present(error)
+    }
+  }
+
+  private func returnToRoot() async {
+    guard let root, beginLoading() else { return }
+    defer { isLoading = false }
+
+    do {
+      let loaded = try await children(of: root)
+      path.removeAll()
+      children = loaded
     } catch {
       ErrorPresenter.shared.present(error)
     }
   }
 
   private func createFolder() async {
-    isLoading = true
+    guard let folder = currentFolder, beginLoading() else { return }
     defer { isLoading = false }
 
     do {
-      let parentID = currentFolder.map { MusicItemID($0.id) }
-      _ = try await MLibrary.createPlaylistFolder(name: newFolderName, parentID: parentID)
+      _ = try await MLibrary.createPlaylistFolder(name: newFolderName, parentID: MusicItemID(folder.id))
       newFolderName = ""
-      await loadChildren()
+      children = try await children(of: folder)
     } catch {
       ErrorPresenter.shared.present(error)
     }
+  }
+
+  private func children(of folder: LibraryPlaylistFolder) async throws -> LibraryPlaylistFolderChildren {
+    try await MLibrary.playlistFolderChildren(forFolderID: MusicItemID(folder.id))
   }
 }
 
