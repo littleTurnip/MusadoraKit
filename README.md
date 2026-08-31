@@ -720,5 +720,3 @@ MusadoraKit is available under the MIT license. See [LICENSE](LICENSE) for more 
 - [Twitter](https://x.com/rudrankriyam)
 
 I hope you love working with MusadoraKit!
-
-[![Star History Chart](https://api.star-history.com/svg?repos=rryam/MusadoraKit&type=Date)](https://star-history.com/#rryam/MusadoraKit&Date)
